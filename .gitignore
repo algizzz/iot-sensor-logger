@@ -1,0 +1,11 @@
+.env
+.mosquitto/config/passwd
+.mosquitto/data/
+.mosquitto/log/
+.influxdb-data/
+.influxdb-config/
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+
