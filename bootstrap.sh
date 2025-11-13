@@ -71,26 +71,34 @@ install_dependencies() {
     fi
 }
 
-# Клонирование репозитория
-clone_repo() {
+# Клонирование репозитория и запуск установки
+clone_and_install() {
     log_info "Клонирование репозитория в ${INSTALL_DIR}..."
 
     if [ -d "${INSTALL_DIR}" ]; then
-        log_warn "Директория ${INSTALL_DIR} уже существует. Клонирование пропущено."
-        log_info "Для обновления выполните 'git pull' внутри этой директории."
-    else
-        git clone "${REPO_URL}" "${INSTALL_DIR}"
-        log_info "Репозиторий успешно склонирован."
+        log_warn "Директория ${INSTALL_DIR} уже существует. Удаление для свежей установки..."
+        rm -rf "${INSTALL_DIR}"
     fi
+    
+    git clone "${REPO_URL}" "${INSTALL_DIR}"
+    cd "${INSTALL_DIR}"
+    
+    log_info "Репозиторий успешно склонирован. Запуск скриптов установки..."
+    
+    log_info "Генерация .env файла..."
+    ./envgen.sh
+    
+    log_info "Развертывание Docker-стека..."
+    ./deploy.sh
 }
 
 # --- Основное выполнение ---
 main() {
     check_root
     install_dependencies
-    clone_repo
-    log_info "Bootstrap-скрипт успешно завершен!"
-    log_info "Ваш проект готов в директории ${INSTALL_DIR}"
+    clone_and_install
+    log_info "Bootstrap-скрипт и установка успешно завершены!"
+    log_info "Проект развернут в директории ${INSTALL_DIR}"
 }
 
 # Запуск основной функции
