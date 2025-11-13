@@ -1,0 +1,16 @@
+# /grafana/provisioning/datasources/influxdb.yml
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB
+    type: influxdb
+    url: http://influxdb:8086
+    access: proxy
+    isDefault: true
+    jsonData:
+      version: Flux
+      organization: ${INFLUXORG}
+      defaultBucket: ${INFLUXBUCKET}
+      tlsSkipVerify: true
+    secureJsonData:
+      token: ${INFLUXTOKEN}

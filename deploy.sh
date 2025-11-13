@@ -177,6 +177,10 @@ setup_directories() {
     mkdir -p "${SCRIPT_DIR}/grafana-data"
     chmod 777 "${SCRIPT_DIR}/grafana-data" # Grafana container runs as user 472, needs write access
 
+    # Create Grafana provisioning directories
+    mkdir -p "${SCRIPT_DIR}/grafana/provisioning"/{datasources,dashboards}
+    chmod -R 755 "${SCRIPT_DIR}/grafana"
+
     log_success "Directory structure created"
 }
 
@@ -186,9 +190,11 @@ configure_firewall() {
     ! command -v ufw &> /dev/null && { log_warning "UFW not found"; return 0; }
     ! ufw status | grep -q "Status: active" && { log_warning "UFW not active"; return 0; }
     
-    local ports=("1883/tcp" "8086/tcp" "${API_PORT}/tcp")
+    local ports=("1883/tcp" "8086/tcp" "3000/tcp" "${API_PORT}/tcp")
     for port in "${ports[@]}"; do
-        ! ufw status | grep -q "${port%/*}" && ufw allow "${port}" comment "IoT Logger" 2>&1 | tee -a "${LOG_FILE}"
+        if ! ufw status | grep -q "${port%/*}"; then
+            ufw allow "${port}" comment "IoT Logger" 2>&1 | tee -a "${LOG_FILE}"
+        fi
     done
     
     log_success "Firewall configured"
@@ -208,7 +214,7 @@ deploy_containers() {
     
     # Дождаться запуска всех контейнеров
     log_info "Waiting for containers to start (max ${CONTAINER_START_TIMEOUT}s)..."
-    local containers=("mosquitto" "influxdb" "telegraf" "api")
+    local containers=("mosquitto" "influxdb" "telegraf" "api" "grafana")
     local elapsed=0
     
     while [ ${elapsed} -lt ${CONTAINER_START_TIMEOUT} ]; do
@@ -278,12 +284,14 @@ main() {
     
     cat <<EOF
 Service URLs:
+  - Grafana UI:  http://${PUBLIC_IP}:3000
   - InfluxDB UI: http://${PUBLIC_IP}:8086
   - API Docs:    http://${PUBLIC_IP}:${API_PORT}/docs
   - MQTT Broker: ${PUBLIC_IP}:1883
 
 Credentials:
-  - InfluxDB: ${DOCKER_INFLUXDB_INIT_USERNAME}
+  - Grafana: ${GRAFANA_ADMIN_USER} / (see .env file)
+  - InfluxDB: ${DOCKER_INFLUXDB_INIT_USERNAME} / (see .env file)
   - MQTT Telegraf: ${MQTTUSER}
   - MQTT Sensor: ${SENSOR_USER}
 

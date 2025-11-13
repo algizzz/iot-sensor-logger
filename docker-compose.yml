@@ -54,9 +54,14 @@ services:
     ports: ["3000:3000"]
     volumes:
       - ./grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
     env_file: .env
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - INFLUXTOKEN=${INFLUXTOKEN}
+      - INFLUXORG=${INFLUXORG}
+      - INFLUXBUCKET=${INFLUXBUCKET}
     depends_on: [influxdb]
     restart: unless-stopped
