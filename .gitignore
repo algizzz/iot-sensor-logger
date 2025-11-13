@@ -11,3 +11,4 @@ __pycache__/
 combine.py
 combined_files.md
 GEMINI.md
+.gemini/

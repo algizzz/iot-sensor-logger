@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # --- КОНФИГУРАЦИЯ ---
-readonly ENV_EXAMPLE="file.env.example"
+readonly ENV_EXAMPLE=".env.example"
 readonly ENV_FILE=".env"
 
 # --- ЦВЕТА ДЛЯ ЛОГОВ ---
