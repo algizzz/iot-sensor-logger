@@ -8,4 +8,6 @@ __pycache__/
 *.pyc
 *.log
 .DS_Store
-
+combine.py
+combined_files.md
+GEMINI.md
