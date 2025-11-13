@@ -37,8 +37,8 @@ generate_token() {
 # Определяет публичный IP-адрес сервера
 detect_public_ip() {
     local ip
-    ip=$(curl -s --max-time 3 ifconfig.me) || \
-    ip=$(curl -s --max-time 3 icanhazip.com) || \
+    ip=$(curl -4 -s --max-time 3 ifconfig.me) || \
+    ip=$(curl -4 -s --max-time 3 icanhazip.com) || \
     ip=$(hostname -I | awk '{print $1}')
     echo "${ip:-"127.0.0.1"}"
 }
