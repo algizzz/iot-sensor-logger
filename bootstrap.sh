@@ -33,10 +33,22 @@ check_root() {
     log_info "Права суперпользователя подтверждены."
 }
 
+# Ожидание снятия блокировки apt
+wait_for_apt_lock() {
+    log_info "Проверка блокировок apt..."
+    while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || fuser /var/lib/dpkg/lock >/dev/null 2>&1 || fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
+        log_warn "Обнаружена блокировка apt. Ожидание 10 секунд..."
+        sleep 10
+    done
+    log_info "Блокировки apt сняты. Продолжение работы."
+}
+
 # Установка зависимостей (Git, Docker)
 install_dependencies() {
     log_info "Проверка и установка зависимостей..."
     
+    wait_for_apt_lock
+
     # Обновляем список пакетов один раз
     log_info "Обновление списка пакетов..."
     apt-get update >/dev/null
