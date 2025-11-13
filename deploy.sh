@@ -173,6 +173,10 @@ setup_directories() {
     touch "${SCRIPT_DIR}/.mosquitto/config/passwd"
     chmod 644 "${SCRIPT_DIR}/.mosquitto/config/passwd"
     
+    # Create Grafana data directory
+    mkdir -p "${SCRIPT_DIR}/grafana-data"
+    chmod 777 "${SCRIPT_DIR}/grafana-data" # Grafana container runs as user 472, needs write access
+
     log_success "Directory structure created"
 }
 

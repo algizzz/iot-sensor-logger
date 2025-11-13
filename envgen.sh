@@ -74,6 +74,8 @@ main() {
     TELEGRAF_PASS=$(generate_password)
     SENSOR_PASS=$(generate_password)
     API_TOKEN=$(generate_token 64)
+    GRAFANA_ADMIN_USER="admin" # Default Grafana admin user
+    GRAFANA_ADMIN_PASSWORD=$(generate_password)
 
     log_info "Публичный IP адрес определен как: ${PUBLIC_IP}"
 
@@ -89,6 +91,8 @@ main() {
     sed -i "s|^SENSORPASS=.*|SENSORPASS=${SENSOR_PASS}|" "${ENV_FILE}"
     sed -i "s|^INFLUXTOKEN=.*|INFLUXTOKEN=${INFLUXDB_ADMIN_TOKEN}|" "${ENV_FILE}"
     sed -i "s|^API_TOKEN=.*|API_TOKEN=${API_TOKEN}|" "${ENV_FILE}"
+    sed -i "s|^GRAFANA_ADMIN_USER=.*|GRAFANA_ADMIN_USER=${GRAFANA_ADMIN_USER}|" "${ENV_FILE}"
+    sed -i "s|^GRAFANA_ADMIN_PASSWORD=.*|GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}|" "${ENV_FILE}"
 
     # 5. Установка прав доступа
     chmod 600 "${ENV_FILE}"

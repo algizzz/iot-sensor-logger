@@ -47,3 +47,16 @@ services:
     ports: ["8000:8000"]
     depends_on: [influxdb]
     restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports: ["3000:3000"]
+    volumes:
+      - ./grafana-data:/var/lib/grafana
+    env_file: .env
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    depends_on: [influxdb]
+    restart: unless-stopped
