@@ -12,3 +12,6 @@ combine.py
 combined_files.md
 GEMINI.md
 .gemini/
+backups/
+grafana-data/
+-
