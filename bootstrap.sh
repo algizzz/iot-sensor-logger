@@ -82,6 +82,9 @@ clone_and_install() {
     
     git clone "${REPO_URL}" "${INSTALL_DIR}"
     cd "${INSTALL_DIR}"
+
+    log_info "Установка прав на выполнение для скриптов..."
+    chmod +x *.sh
     
     log_info "Репозиторий успешно склонирован. Запуск скриптов установки..."
     
