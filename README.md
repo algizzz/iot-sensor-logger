@@ -33,13 +33,6 @@ The project is designed to be run with Docker and Docker Compose.
 
     This will create a `.env` file based on the `.env.example` template.
 
-2.  **Bootstrap the environment (optional):**
-
-    The `bootstrap.sh` script can be used to install Docker and clone the project repository. This is useful for setting up a new server from scratch.
-
-    ```bash
-    ./bootstrap.sh
-    ```
 
 2.  **Automated Installation:**
 
