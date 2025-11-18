@@ -169,7 +169,7 @@ setup_directories() {
     mkdir -p "${SCRIPT_DIR}/.mosquitto"/{config,data,log}
     chmod -R 755 "${SCRIPT_DIR}/.mosquitto"
     
-    # КРИТИЧНО: Создать файл паролей до запуска контейнера
+    # CRITICAL: Create password file before starting the container
     touch "${SCRIPT_DIR}/.mosquitto/config/passwd"
     chmod 644 "${SCRIPT_DIR}/.mosquitto/config/passwd"
     
@@ -212,7 +212,7 @@ deploy_containers() {
     
     register_cleanup "docker compose down"
     
-    # Дождаться запуска всех контейнеров
+    # Wait for all containers to start
     log_info "Waiting for containers to start (max ${CONTAINER_START_TIMEOUT}s)..."
     local containers=("mosquitto" "influxdb" "telegraf" "api" "grafana")
     local elapsed=0
@@ -229,7 +229,7 @@ deploy_containers() {
         
         if [ "${all_running}" = true ]; then
             log_success "All containers running"
-            sleep 3  # Дополнительное время для инициализации
+            sleep 3  # Extra time for initialization
             return 0
         fi
         
@@ -308,4 +308,3 @@ EOF
 }
 
 main "$@"
-

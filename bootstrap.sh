@@ -1,122 +1,120 @@
 #!/bin/bash
 
 # ==============================================================================
-# Простой bootstrap-скрипт для первоначальной настройки сервера
+# A simple bootstrap script for initial server setup
 # ==============================================================================
 
 set -euo pipefail
 
-# --- Конфигурация ---
+# --- Configuration ---
 readonly REPO_URL="https://github.com/algizzz/iot-sensor-logger.git"
 readonly INSTALL_DIR="/opt/iot-sensor-logger"
 
-# --- Цвета для логов ---
+# --- Log Colors ---
 readonly GREEN='\033[0;32m'
 readonly RED='\033[0;31m'
 readonly YELLOW='\033[1;33m'
-readonly NC='\033[0m' # Без цвета
+readonly NC='\033[0m' # No Color
 
-# --- Функции логирования ---
-log_info() { echo -e "${GREEN}[ИНФО]${NC} $*"; }
-log_warn() { echo -e "${YELLOW}[ПРЕДУПРЕЖДЕНИЕ]${NC} $*"; }
-log_error() { echo -e "${RED}[ОШИБКА]${NC} $*"; }
+# --- Logging Functions ---
+log_info() { echo -e "${GREEN}[INFO]${NC} $*"; }
+log_warn() { echo -e "${YELLOW}[WARNING]${NC} $*"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-# --- Основные функции ---
+# --- Main Functions ---
 
-# Проверка прав суперпользователя
+# Checking for superuser privileges
 check_root() {
-    log_info "Проверка прав суперпользователя..."
+    log_info "Checking for superuser privileges..."
     if [ "$EUID" -ne 0 ]; then
-        log_error "Этот скрипт должен быть запущен от имени root. Используйте 'sudo'."
+        log_error "This script must be run as root. Use 'sudo'."
         exit 1
     fi
-    log_info "Права суперпользователя подтверждены."
+    log_info "Superuser privileges confirmed."
 }
 
-# Ожидание снятия блокировки apt
+# Waiting for apt lock to be released
 wait_for_apt_lock() {
-    log_info "Проверка блокировок apt..."
+    log_info "Checking for apt locks..."
     while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || fuser /var/lib/dpkg/lock >/dev/null 2>&1 || fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
-        log_warn "Обнаружена блокировка apt. Ожидание 10 секунд..."
+        log_warn "apt lock detected. Waiting 10 seconds..."
         sleep 10
     done
-    log_info "Блокировки apt сняты. Продолжение работы."
+    log_info "apt locks released. Continuing."
 }
 
-# Установка зависимостей (Git, Docker)
+# Installing dependencies (Git, Docker)
 install_dependencies() {
-    log_info "Проверка и установка зависимостей..."
+    log_info "Checking and installing dependencies..."
     
     wait_for_apt_lock
 
-    # Обновляем список пакетов один раз
-    log_info "Обновление списка пакетов..."
+    # Updating package list once
+    log_info "Updating package list..."
     apt-get update >/dev/null
 
-    # Установка Git
+    # Installing Git
     if command -v git &>/dev/null; then
-        log_info "Git уже установлен."
+        log_info "Git is already installed."
     else
-        log_info "Git не найден. Установка..."
+        log_info "Git not found. Installing..."
         apt-get install -y git
-        log_info "Git успешно установлен."
+        log_info "Git installed successfully."
     fi
 
-    # Установка Docker
+    # Installing Docker
     if command -v docker &>/dev/null; then
-        log_info "Docker уже установлен."
+        log_info "Docker is already installed."
     else
-        log_info "Docker не найден. Установка..."
+        log_info "Docker not found. Installing..."
         curl -fsSL https://get.docker.com -o get-docker.sh
         sh get-docker.sh
         rm get-docker.sh
-        log_info "Docker успешно установлен."
+        log_info "Docker installed successfully."
     fi
 
-    # Установка Docker Compose
+    # Installing Docker Compose
     if docker compose version &>/dev/null; then
-        log_info "Docker Compose уже установлен."
+        log_info "Docker Compose is already installed."
     else
-        log_info "Docker Compose не найден. Установка плагина..."
+        log_info "Docker Compose not found. Installing plugin..."
         apt-get install -y docker-compose-plugin
-        log_info "Плагин Docker Compose успешно установлен."
+        log_info "Docker Compose plugin installed successfully."
     fi
 }
 
-# Клонирование репозитория и запуск установки
+# Cloning repository and starting installation
 clone_and_install() {
-    log_info "Клонирование репозитория в ${INSTALL_DIR}..."
+    log_info "Cloning repository into ${INSTALL_DIR}..."
 
     if [ -d "${INSTALL_DIR}" ]; then
-        log_warn "Директория ${INSTALL_DIR} уже существует. Удаление для свежей установки..."
+        log_warn "Directory ${INSTALL_DIR} already exists. Deleting for a fresh installation..."
         rm -rf "${INSTALL_DIR}"
     fi
     
     git clone "${REPO_URL}" "${INSTALL_DIR}"
     cd "${INSTALL_DIR}"
 
-    log_info "Установка прав на выполнение для скриптов..."
+    log_info "Setting execute permissions for scripts..."
     chmod +x *.sh
     
-    log_info "Репозиторий успешно склонирован. Запуск скриптов установки..."
+    log_info "Repository cloned successfully. Running installation scripts..."
     
-    log_info "Генерация .env файла..."
+    log_info "Generating .env file..."
     ./envgen.sh
     
-    log_info "Развертывание Docker-стека..."
+    log_info "Deploying Docker stack..."
     ./deploy.sh
 }
 
-# --- Основное выполнение ---
+# --- Main Execution ---
 main() {
     check_root
     install_dependencies
     clone_and_install
-    log_info "Bootstrap-скрипт и установка успешно завершены!"
-    log_info "Проект развернут в директории ${INSTALL_DIR}"
+    log_info "Bootstrap script and installation completed successfully!"
+    log_info "The project is deployed in the ${INSTALL_DIR} directory"
 }
 
-# Запуск основной функции
+# Running main function
 main
-
-

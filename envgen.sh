@@ -1,40 +1,40 @@
 #!/bin/bash
 # ==============================================================================
-# Скрипт для генерации .env файла с безопасными учетными данными
-# Использует .env.example как шаблон.
+# Script for generating .env file with secure credentials
+# Uses .env.example as a template.
 # ==============================================================================
 
 set -euo pipefail
 
-# --- КОНФИГУРАЦИЯ ---
+# --- CONFIGURATION ---
 readonly ENV_EXAMPLE=".env.example"
 readonly ENV_FILE=".env"
 
-# --- ЦВЕТА ДЛЯ ЛОГОВ ---
+# --- LOG COLORS ---
 readonly GREEN='\033[0;32m'
 readonly YELLOW='\033[1;33m'
 readonly RED='\033[0;31m'
-readonly NC='\033[0m' # Без цвета
+readonly NC='\033[0m' # No Color
 
-# --- ФУНКЦИИ ЛОГИРОВАНИЯ ---
-log_info() { echo -e "${GREEN}[ИНФО]${NC} $*"; }
-log_warn() { echo -e "${YELLOW}[ПРЕДУПРЕЖДЕНИЕ]${NC} $*"; }
-log_error() { echo -e "${RED}[ОШИБКА]${NC} $*"; }
+# --- LOGGING FUNCTIONS ---
+log_info() { echo -e "${GREEN}[INFO]${NC} $*"; }
+log_warn() { echo -e "${YELLOW}[WARNING]${NC} $*"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
-# --- ГЕНЕРАТОРЫ ДАННЫХ ---
+# --- DATA GENERATORS ---
 
-# Генерирует безопасный пароль
+# Generates a secure password
 generate_password() {
     openssl rand -base64 24
 }
 
-# Генерирует безопасный токен указанной длины
+# Generates a secure token of a specified length
 generate_token() {
     local length="${1:-64}"
     openssl rand -base64 96 | tr -d '=+/\n' | cut -c1-"${length}"
 }
 
-# Определяет публичный IP-адрес сервера
+# Detects the public IP address of the server
 detect_public_ip() {
     local ip
     ip=$(curl -4 -s --max-time 3 ifconfig.me) || \
@@ -44,32 +44,32 @@ detect_public_ip() {
 }
 
 
-# --- ОСНОВНАЯ ЛОГИКА ---
+# --- MAIN LOGIC ---
 main() {
-    log_info "Запуск генерации файла .env..."
+    log_info "Starting .env file generation..."
 
-    # 1. Проверка наличия .env.example
+    # 1. Checking for .env.example
     if [ ! -f "${ENV_EXAMPLE}" ]; then
-        log_error "Файл-шаблон '${ENV_EXAMPLE}' не найден. Поместите его в ту же директорию."
+        log_error "Template file '${ENV_EXAMPLE}' not found. Place it in the same directory."
         exit 1
     fi
 
-    # 2. Проверка, существует ли .env
+    # 2. Checking if .env exists
     if [ -f "${ENV_FILE}" ]; then
-        log_warn "Файл '${ENV_FILE}' уже существует."
-        read -p "Вы уверены, что хотите перезаписать его? (y/N): " choice
+        log_warn "File '${ENV_FILE}' already exists."
+        read -p "Are you sure you want to overwrite it? (y/N): " choice
         case "$choice" in
-            y|Y ) log_info "Файл будет перезаписан.";;
-            * ) log_info "Операция отменена."; exit 0;;
+            y|Y ) log_info "The file will be overwritten.";;
+            * ) log_info "Operation cancelled."; exit 0;; 
         esac
     fi
 
-    # 3. Генерация новых значений
-    log_info "Генерация безопасных учетных данных..."
+    # 3. Generating new values
+    log_info "Generating secure credentials..."
     PUBLIC_IP=$(detect_public_ip)
     INFLUXDB_PASS=$(generate_password)
-    # В .env.example DOCKER_INFLUXDB_INIT_ADMIN_TOKEN и INFLUXTOKEN используют один и тот же шаблон,
-    # поэтому генерируем для них одно значение, как и предполагается.
+    # In .env.example DOCKER_INFLUXDB_INIT_ADMIN_TOKEN and INFLUXTOKEN use the same template,
+    # so we generate one value for them, as intended.
     INFLUXDB_ADMIN_TOKEN=$(generate_token 64)
     TELEGRAF_PASS=$(generate_password)
     SENSOR_PASS=$(generate_password)
@@ -77,13 +77,13 @@ main() {
     GRAFANA_ADMIN_USER="admin" # Default Grafana admin user
     GRAFANA_ADMIN_PASSWORD=$(generate_password)
 
-    log_info "Публичный IP адрес определен как: ${PUBLIC_IP}"
+    log_info "Public IP address detected as: ${PUBLIC_IP}"
 
-    # 4. Копирование шаблона и замена значений
-    log_info "Создание файла '${ENV_FILE}' на основе шаблона..."
+    # 4. Copying template and replacing values
+    log_info "Creating '${ENV_FILE}' from template..."
     cp "${ENV_EXAMPLE}" "${ENV_FILE}"
 
-    # Используем sed для надежной замены значений по ключу
+    # Using sed for reliable replacement of values by key
     sed -i "s|^PUBLIC_IP=.*|PUBLIC_IP=${PUBLIC_IP}|" "${ENV_FILE}"
     sed -i "s|^DOCKER_INFLUXDB_INIT_PASSWORD=.*|DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASS}|" "${ENV_FILE}"
     sed -i "s|^DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=.*|DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_ADMIN_TOKEN}|" "${ENV_FILE}"
@@ -94,18 +94,17 @@ main() {
     sed -i "s|^GRAFANA_ADMIN_USER=.*|GRAFANA_ADMIN_USER=${GRAFANA_ADMIN_USER}|" "${ENV_FILE}"
     sed -i "s|^GRAFANA_ADMIN_PASSWORD=.*|GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}|" "${ENV_FILE}"
 
-    # 5. Установка прав доступа
+    # 5. Setting permissions
     chmod 600 "${ENV_FILE}"
 
     log_info "--------------------------------------------------"
-    log_info "Файл '${ENV_FILE}' успешно создан и защищен."
-    log_info "Сохраните эти данные в безопасном месте."
+    log_info "File '${ENV_FILE}' has been successfully created and secured."
+    log_info "Keep this data in a safe place."
     log_info "--------------------------------------------------"
     
-    # Показать результат без комментариев
+    # Show result without comments
     grep -v '^#' "${ENV_FILE}"
 }
 
-# --- ЗАПУСК СКРИПТА ---
+# --- RUN SCRIPT ---
 main
-
