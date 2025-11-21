@@ -55,11 +55,11 @@ To run the entire stack, use the `deploy.sh` script:
 This script will:
 
 1.  Read the configuration from the `.env` file.
-2.  Check for dependencies like Docker and Docker Compose.
-3.  Set up the necessary directories and permissions.
+2.  **Validate and install (if necessary) Docker and Docker Compose.**
+3.  Set up the necessary directories and permissions, **including backing up existing Mosquitto configurations and setting correct permissions for Grafana data.**
 4.  Configure the firewall (if UFW is enabled).
-5.  Build and start all the services using `docker-compose up`.
-6.  Configure the MQTT users and passwords.
+5.  Build and start all the services using `docker compose up`.
+6.  Configure the MQTT users and passwords **for both Telegraf and sensor devices.**
 
 ### Accessing Services
 
