@@ -12,11 +12,7 @@ The data flows through the system in a clear, unidirectional path:
 
 **IoT Device -> Mosquitto (MQTT) -> Telegraf -> InfluxDB -> Grafana / API**
 
-This architecture ensures that the system is easy to understand, debug, and scale.
 
-![Architecture Diagram](https://raw.githubusercontent.com/algizzz/iot-sensor-logger/main/docs/architecture.png) 
-
-*(Note: The diagram is a representation of the architecture and is not dynamically generated)*
 
 ### Core Components
 
@@ -36,6 +32,25 @@ The entire stack is designed to be easily deployed using Docker and Docker Compo
 *   **Docker Compose:** [Installation Guide](https://docs.docker.com/compose/install/)
 
 ### Installation and Setup
+
+### Automated Installation
+
+For a fully automated installation, you can use the following command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/algizzz/iot-sensor-logger/graphi/bootstrap.sh | sudo bash
+```
+
+This command downloads the `bootstrap.sh` script directly from the GitHub repository and executes it with `sudo`. Upon execution, the script performs a complete, automated setup of the IoT Sensor Logger stack, which includes:
+
+*   **Generating** a secure `.env` configuration file.
+*   **Checking for and installing** Docker and Docker Compose prerequisites if they are not found.
+*   **Setting up essential directories** and configuring their permissions.
+*   **Configuring the firewall** (if UFW is enabled) to allow necessary traffic.
+*   **Building and starting** all Docker services, including Mosquitto, Telegraf, InfluxDB, Grafana, and the FastAPI API.
+*   **Configuring MQTT users and passwords** for both Telegraf and sensor devices.
+
+The result is a fully operational IoT sensor logging and monitoring system.
 
 1.  **Clone the Repository:**
     ```bash
