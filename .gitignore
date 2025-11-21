@@ -4,6 +4,8 @@
 .mosquitto/log/
 .influxdb-data/
 .influxdb-config/
+logs/
+public-dashboard-url.txt
 __pycache__/
 *.pyc
 *.log
