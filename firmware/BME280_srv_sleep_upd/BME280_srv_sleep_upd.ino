@@ -27,7 +27,7 @@ typedef struct {
   char mqtt_server[41] = "193.107.237.215";
   uint16_t mqtt_port = 1883;
   char mqtt_user[21] = "sensor";
-  char mqtt_pass[21] = "sensorpass";
+  char mqtt_pass[65] = "sensorpass";
 } DeviceConfig;
 
 DeviceConfig config;
@@ -302,7 +302,7 @@ void setup() {
   WiFiManagerParameter p2("mqtt_server", "MQTT Server", config.mqtt_server, 40);
   WiFiManagerParameter p3("mqtt_port", "MQTT Port", port_str, 5);
   WiFiManagerParameter p4("mqtt_user", "MQTT User", config.mqtt_user, 20);
-  WiFiManagerParameter p5("mqtt_pass", "MQTT Pass", config.mqtt_pass, 20);
+  WiFiManagerParameter p5("mqtt_pass", "MQTT Pass", config.mqtt_pass, 64);
   
   wifiManager.addParameter(&p1);
   wifiManager.addParameter(&p2);
@@ -335,8 +335,8 @@ void setup() {
     
     String tempPass = String(p5.getValue());
     tempPass.trim();
-    strncpy(config.mqtt_pass, tempPass.c_str(), 20);
-    config.mqtt_pass[20] = '\0';
+    strncpy(config.mqtt_pass, tempPass.c_str(), 64);
+    config.mqtt_pass[64] = '\0';
     
     Serial.printf("Saved MQTT password: [%s] (len=%d)\n", 
                   config.mqtt_pass, strlen(config.mqtt_pass));
