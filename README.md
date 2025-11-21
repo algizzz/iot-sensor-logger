@@ -39,7 +39,7 @@ The project is designed to be run with Docker and Docker Compose.
     For a fully automated installation, you can use the following command:
 
     ```bash
-    curl -fsSL https://raw.githubusercontent.com/algizzz/iot-sensor-logger/master/bootstrap.sh | sudo bash
+    curl -fsSL https://raw.githubusercontent.com/algizzz/iot-sensor-logger/graphi/bootstrap.sh | sudo bash
     ```
 
     This command downloads the `bootstrap.sh` script directly from the GitHub repository and executes it with `sudo`, performing a complete setup of the IoT Sensor Logger stack.
