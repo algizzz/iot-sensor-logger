@@ -1,10 +1,23 @@
 # IoT Sensor Logger
 
+![Docker](https://img.shields.io/badge/Docker-20.10+-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![ESP8266](https://img.shields.io/badge/ESP8266-Arduino-orange)
+
 ## Project Overview
 
 This project provides a comprehensive, Docker-based stack for IoT sensor data collection, storage, visualization, and management. It's designed to be a robust and scalable solution for logging and monitoring sensor readings from multiple devices.
 
 The stack is composed of several key services, each running in its own Docker container, ensuring modularity and ease of deployment.
+
+## Features
+
+- **One-command deployment** with automated Docker setup
+- **Three firmware options**: standard, deep sleep, and OTA updates
+- **Public dashboards** for sharing sensor data
+- **RESTful API** with token authentication
+- **Battery-optimized** deep sleep mode (30s intervals)
+- **WiFiManager** for wireless configuration without hardcoding
 
 ## Architecture
 
@@ -12,7 +25,14 @@ The data flows through the system in a clear, unidirectional path:
 
 **IoT Device -> Mosquitto (MQTT) -> Telegraf -> InfluxDB -> Grafana / API**
 
-
+```mermaid
+graph LR
+    A[IoT Device<br/>ESP8266 + BME280] -->|MQTT| B[Mosquitto<br/>:1883]
+    B -->|Subscribe| C[Telegraf]
+    C -->|Write| D[InfluxDB<br/>:8086]
+    D -->|Query| E[Grafana<br/>:3000]
+    D -->|Query| F[FastAPI<br/>:8000]
+```
 
 ### Core Components
 
@@ -31,9 +51,9 @@ The entire stack is designed to be easily deployed using Docker and Docker Compo
 *   **Docker:** [Installation Guide](https://docs.docker.com/engine/install/)
 *   **Docker Compose:** [Installation Guide](https://docs.docker.com/compose/install/)
 
-### Installation and Setup
-
 ### Automated Installation
+
+> **Warning:** This script requires sudo privileges and modifies system configuration (firewall, Docker installation). Review [bootstrap.sh](https://github.com/algizzz/iot-sensor-logger/blob/graphi/bootstrap.sh) before running.
 
 For a fully automated installation, you can use the following command:
 
@@ -51,6 +71,8 @@ This command downloads the `bootstrap.sh` script directly from the GitHub reposi
 *   **Configuring MQTT users and passwords** for both Telegraf and sensor devices.
 
 The result is a fully operational IoT sensor logging and monitoring system.
+
+### Manual Installation
 
 1.  **Clone the Repository:**
     ```bash
@@ -83,8 +105,15 @@ Once the stack is running, you can access the services at the following default 
 
 *   **Grafana:** `http://<your_server_ip>:3000`
 *   **InfluxDB:** `http://<your_server_ip>:8086`
-*   **API Docs:** `http://<your_server_ip>:8000/docs`
+*   **API Docs:** `http://<your_server_ip>:8000/docs` - Interactive API documentation with all available endpoints
 *   **MQTT Broker:** `<your_server_ip>:1883`
+
+### What's Next
+
+1. **Configure your first sensor** — Flash ESP8266 firmware from `firmware/BME280_srv/`
+2. **Connect device** — Power on ESP8266, connect to WiFi portal, enter MQTT credentials
+3. **View data** — Open Grafana dashboard at `http://<your_server_ip>:3000`
+4. **Customize** — Edit `grafana/dashboards/` to modify visualizations
 
 ### Managing the Services
 
@@ -120,7 +149,13 @@ The script will handle the necessary modifications to the dashboard configuratio
 
 The `firmware/` directory contains Arduino-compatible source code for ESP8266-based sensor devices. All firmware versions use the **WiFiManager** library, which creates a web portal for easy configuration of Wi-Fi and MQTT credentials without hardcoding them.
 
-There are three versions of the firmware available:
+| Version | Features | Power Mode | Use Case |
+|---------|----------|------------|----------|
+| `BME280_srv` | Standard polling every 10s | Always-on | USB-powered devices |
+| `BME280_srv_sleep` | Deep sleep 30s intervals | Battery optimized | Battery-powered sensors |
+| `BME280_srv_sleep_upd` | Deep sleep + OTA updates | Battery optimized | Remote battery devices |
+
+### Firmware Details
 
 1.  **`BME280_srv/`**
     *   **Description:** The standard firmware. It connects the device to Wi-Fi and MQTT, reads temperature, humidity, and pressure from a BME280 sensor, and publishes the data every 10 seconds.
@@ -145,3 +180,7 @@ All service configurations are managed through the `.env` file. No secrets or en
 
 ### Hardware
 The `hardware/` directory contains 3D models (`.stp`, `.m3d`) for a sensor enclosure and PCB design files (`.pcbdoc`, `.schdoc`) for a custom sensor board.
+
+## License
+
+This project is open source. See repository details for language statistics and activity.
